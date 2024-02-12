@@ -134,7 +134,7 @@ class ArgoverseV2Dataset(Dataset):
         self._num_samples = {
             'train': 199908,
             'val': 24988,
-            'test': 24984,
+            'test': 1,
         }[split]
         self._agent_types = ['vehicle', 'pedestrian', 'motorcyclist', 'cyclist', 'bus', 'static', 'background',
                              'construction', 'riderless_bicycle', 'unknown']
@@ -187,6 +187,8 @@ class ArgoverseV2Dataset(Dataset):
             map_dir = Path(self.raw_dir) / raw_file_name
             map_path = map_dir / sorted(map_dir.glob('log_map_archive_*.json'))[0]
             map_data = read_json_file(map_path)
+            map_data['drivable_areas'] = []
+            map_data['pedestrian_crossings'] = []
             centerlines = {lane_segment['id']: Polyline.from_json_data(lane_segment['centerline'])
                            for lane_segment in map_data['lane_segments'].values()}
             map_api = ArgoverseStaticMap.from_json(map_path)

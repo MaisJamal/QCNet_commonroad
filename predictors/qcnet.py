@@ -319,8 +319,10 @@ class QCNet(pl.LightningModule):
 
         traj_eval = traj_eval.cpu().numpy()
         pi_eval = pi_eval.cpu().numpy()
+        #print("********************************************")
         if self.dataset == 'argoverse_v2':
             eval_id = list(compress(list(chain(*data['agent']['id'])), eval_mask))
+            #print("pi trajs ", pi_eval[0], " agent id ", eval_id[0] , " trajectories " , traj_eval[0])
             if isinstance(data, Batch):
                 for i in range(data.num_graphs):
                     self.test_predictions[data['scenario_id'][i]] = (pi_eval[i], {eval_id[i]: traj_eval[i]})
