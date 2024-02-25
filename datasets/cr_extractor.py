@@ -393,3 +393,10 @@ def  extract_front_obstacle(obstacles,q_ego):
                     if obstacles[i][0][0] < obstacles[front_obs_idx][0][0]: # found a closed front obstacle
                         front_obs_idx = i
     return front_obs_idx
+
+
+
+def cr_scene_to_qcnet (scene_path):
+    init_x, init_y,init_heading,init_speed,init_scene_obstacles,scen_rotation, lane_width,future_trajectories_obstacles,total_time_steps = extract_data(scene_path)
+    data = init_x
+    return data

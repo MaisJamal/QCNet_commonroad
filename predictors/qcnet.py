@@ -33,6 +33,8 @@ from metrics import minFDE
 from metrics import minFHE
 from modules import QCNetDecoder
 from modules import QCNetEncoder
+from visualization.visual import plot_single_vehicle
+from visualization.test_zy import run_generate_scenario_visualizations
 
 try:
     from av2.datasets.motion_forecasting.eval.submission import ChallengeSubmission
@@ -301,10 +303,9 @@ class QCNet(pl.LightningModule):
             traj_refine = torch.cat([pred['loc_refine_pos'][..., :self.output_dim],
                                      pred['scale_refine_pos'][..., :self.output_dim]], dim=-1)
         pi = pred['pi']
-        if self.dataset == 'argoverse_v2':
-            eval_mask = data['agent']['category'] == 3
-        else:
-            raise ValueError('{} is not a valid dataset'.format(self.dataset))
+        ####zy visualization
+        eval_mask = data['agent']['category'] == 3
+        traj_past = data['agent']['position'][eval_mask, :self.num_historical_steps, :2].cpu()
         origin_eval = data['agent']['position'][eval_mask, self.num_historical_steps - 1]
         theta_eval = data['agent']['heading'][eval_mask, self.num_historical_steps - 1]
         cos, sin = theta_eval.cos(), theta_eval.sin()
@@ -315,6 +316,16 @@ class QCNet(pl.LightningModule):
         rot_mat[:, 1, 1] = cos
         traj_eval = torch.matmul(traj_refine[eval_mask, :, :, :2],
                                  rot_mat.unsqueeze(1)) + origin_eval[:, :2].reshape(-1, 1, 1, 2)
+        
+        traj_eval=traj_eval.cpu()
+        gt_eval = data['agent']['position'][eval_mask, self.num_historical_steps:, :2].cpu()
+        current_working_directory = str(Path.cwd())
+        base_path = current_working_directory + '/test_test/test/{}'
+        full_path = base_path.format(data.scenario_id[0])
+        save_path = current_working_directory + '/test_test/test/plot/'
+        run_generate_scenario_visualizations(full_path,save_path,1,'first',True,traj_eval[0,:,:,:])
+        plot_single_vehicle(traj_past.numpy(),gt_eval.numpy(),traj_eval[0,:,:,:].numpy(),data.scenario_id[0])
+        
         pi_eval = F.softmax(pi[eval_mask], dim=-1)
 
         traj_eval = traj_eval.cpu().numpy()

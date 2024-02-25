@@ -19,7 +19,14 @@ from torch_geometric.loader import DataLoader
 from datasets import ArgoverseV2Dataset
 from predictors import QCNet
 
+import datasets.cr_extractor as extractor
+
+
 if __name__ == '__main__':
+
+    scene_path = "datasets/commonroad/USA_US101-1_1_T-1.xml"     
+    data = extractor.cr_scene_to_qcnet(scene_path)
+
     pl.seed_everything(2023, workers=True)
 
     parser = ArgumentParser()
@@ -43,11 +50,11 @@ if __name__ == '__main__':
     dataloader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers,
                             pin_memory=args.pin_memory, persistent_workers=args.persistent_workers)
     trainer = pl.Trainer(accelerator=args.accelerator, devices=args.devices, strategy='ddp')
-    #predictions = trainer.test(model, dataloader)
-    predictions = trainer.predict(model, dataloader,return_predictions=True)
-    print("pi" ,predictions[0]['pi'])
-    print("loc_refine_pos" ,predictions[0]['loc_refine_pos'])
-    print("loc_refine_head" ,predictions[0]['loc_refine_head'])
+    predictions = trainer.test(model, dataloader)
+    # predictions = trainer.predict(model, dataloader,return_predictions=True)
+    # print("pi" ,predictions[0]['pi'])
+    # print("loc_refine_pos" ,predictions[0]['loc_refine_pos'])
+    # print("loc_refine_head" ,predictions[0]['loc_refine_head'])
  
 
 
