@@ -18,6 +18,11 @@ from visualization.zyvisual import visualize_scenario
 # )
 from av2.map.map_api import ArgoverseStaticMap
 
+
+import datasets.cr_extractor as extractor
+import datasets.cr_argoverse_converter as conv
+from commonroad.common.file_reader import CommonRoadFileReader
+
 _DEFAULT_N_JOBS: Final[int] = -2  # Use all but one CPUs
 
 
@@ -69,9 +74,14 @@ def generate_scenario_visualizations(
             scenario_path.parents[0] / f"log_map_archive_{scenario_id}.json"
         )
         viz_save_path = viz_output_dir / f"{scenario_id}.mp4"
+        ## edit
+        scene_path = "datasets/commonroad/USA_US101-1_1_T-1.xml"     
+        scenario, planning_problem_set = CommonRoadFileReader(scene_path).open()
+        argo_map,centerlines = conv.converter(scenario, planning_problem_set)
 
+        static_map = argo_map
         scenario = scenario_serialization.load_argoverse_scenario_parquet(scenario_path)
-        static_map = ArgoverseStaticMap.from_json(static_map_path)
+        #static_map = ArgoverseStaticMap.from_json(static_map_path)
         # visualize_zy(scenario, static_map, viz_save_path,predicted_trajectories=predicted_trajectories)
         visualize_scenario(scenario, static_map, viz_save_path,predicted_trajectories=predicted_trajectories)
 

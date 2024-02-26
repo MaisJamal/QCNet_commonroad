@@ -20,12 +20,16 @@ from datasets import ArgoverseV2Dataset
 from predictors import QCNet
 
 import datasets.cr_extractor as extractor
+import datasets.cr_argoverse_converter as conv
+from commonroad.common.file_reader import CommonRoadFileReader
 
 
 if __name__ == '__main__':
 
-    scene_path = "datasets/commonroad/USA_US101-1_1_T-1.xml"     
-    data = extractor.cr_scene_to_qcnet(scene_path)
+    #scene_path = "datasets/commonroad/USA_US101-1_1_T-1.xml"     
+    #data = extractor.cr_scene_to_qcnet(scene_path)
+    #scenario, planning_problem_set = CommonRoadFileReader(scene_path).open()
+    #argo_map,centerlines = conv.converter(scenario, planning_problem_set)
 
     pl.seed_everything(2023, workers=True)
 

@@ -42,6 +42,10 @@ except ImportError:
     Polyline = object
     read_json_file = object
 
+import datasets.cr_extractor as extractor
+import datasets.cr_argoverse_converter as conv
+from commonroad.common.file_reader import CommonRoadFileReader
+
 
 class ArgoverseV2Dataset(Dataset):
     """Dataset class for Argoverse 2 Motion Forecasting Dataset.
@@ -189,14 +193,25 @@ class ArgoverseV2Dataset(Dataset):
             map_data = read_json_file(map_path)
             map_data['drivable_areas'] = []
             map_data['pedestrian_crossings'] = []
-            centerlines = {lane_segment['id']: Polyline.from_json_data(lane_segment['centerline'])
-                           for lane_segment in map_data['lane_segments'].values()}
-            map_api = ArgoverseStaticMap.from_json(map_path)
+            ## new ##
+
+            scene_path = "datasets/commonroad/USA_US101-1_1_T-1.xml"     
+            #data = extractor.cr_scene_to_qcnet(scene_path)
+            scenario, planning_problem_set = CommonRoadFileReader(scene_path).open()
+            argo_map,centerlines = conv.converter(scenario, planning_problem_set)
+
+            map_api = argo_map
+            ## edit ##
+            #centerlines = {lane_segment['id']: Polyline.from_json_data(lane_segment['centerline'])
+            #               for lane_segment in map_data['lane_segments'].values()}
+            #map_api = ArgoverseStaticMap.from_json(map_path)
             data = dict()
             data['scenario_id'] = self.get_scenario_id(df)
             data['city'] = self.get_city(df)
             data['agent'] = self.get_agent_features(df)
             data.update(self.get_map_features(map_api, centerlines))
+
+            ## end edit ##
             with open(os.path.join(self.processed_dir, f'{raw_file_name}.pkl'), 'wb') as handle:
                 pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 

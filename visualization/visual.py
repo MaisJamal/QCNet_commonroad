@@ -9,6 +9,12 @@ from typing import Callable, Dict, List, Optional, Tuple, Union
 from typing import Final, List, Optional, Sequence, Set, Tuple
 from av2.utils.typing import NDArrayFloat, NDArrayInt
 from pathlib import Path
+
+
+import datasets.cr_extractor as extractor
+import datasets.cr_argoverse_converter as conv
+from commonroad.common.file_reader import CommonRoadFileReader
+
 _LANE_SEGMENT_COLOR: Final[str] = "#E0E0E0"
 _DRIVABLE_AREA_COLOR: Final[str] = "#7A7A7A"
 '''
@@ -135,9 +141,14 @@ def plot_single_vehicle(
         head_width=0.1,
     )
     current_working_directory = str(Path.cwd())
-    static_map_path=f"{current_working_directory}/test_test/test/raw/{scenario_id}/log_map_archive_{scenario_id}.json"
-    static_map_path=Path(static_map_path)
-    static_map = ArgoverseStaticMap.from_json(static_map_path)
+    # ## edit
+    # static_map_path=f"{current_working_directory}/test_test/test/raw/{scenario_id}/log_map_archive_{scenario_id}.json"
+    # static_map_path=Path(static_map_path)
+    # static_map = ArgoverseStaticMap.from_json(static_map_path)
+    scene_path = "datasets/commonroad/USA_US101-1_1_T-1.xml"     
+    scenario, planning_problem_set = CommonRoadFileReader(scene_path).open()
+    static_map,centerlines = conv.converter(scenario, planning_problem_set)
+    ##
     _plot_static_map_elements(static_map)
 
     plt.xlim(min_x - x_buffer, max_x + x_buffer)
