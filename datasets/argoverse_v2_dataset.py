@@ -198,7 +198,7 @@ class ArgoverseV2Dataset(Dataset):
             scene_path = "datasets/commonroad/USA_US101-1_1_T-1.xml"     
             #data = extractor.cr_scene_to_qcnet(scene_path)
             scenario, planning_problem_set = CommonRoadFileReader(scene_path).open()
-            argo_map,centerlines = conv.converter(scenario, planning_problem_set)
+            argo_map,centerlines,df_agents = conv.converter(scenario, planning_problem_set)
 
             map_api = argo_map
             ## edit ##
@@ -208,7 +208,7 @@ class ArgoverseV2Dataset(Dataset):
             data = dict()
             data['scenario_id'] = self.get_scenario_id(df)
             data['city'] = self.get_city(df)
-            data['agent'] = self.get_agent_features(df)
+            data['agent'] = self.get_agent_features(df_agents)
             data.update(self.get_map_features(map_api, centerlines))
 
             ## end edit ##

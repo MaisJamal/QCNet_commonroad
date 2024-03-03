@@ -147,7 +147,7 @@ def plot_single_vehicle(
     # static_map = ArgoverseStaticMap.from_json(static_map_path)
     scene_path = "datasets/commonroad/USA_US101-1_1_T-1.xml"     
     scenario, planning_problem_set = CommonRoadFileReader(scene_path).open()
-    static_map,centerlines = conv.converter(scenario, planning_problem_set)
+    static_map,centerlines,df_agents = conv.converter(scenario, planning_problem_set)
     ##
     _plot_static_map_elements(static_map)
 

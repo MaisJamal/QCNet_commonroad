@@ -304,7 +304,7 @@ class QCNet(pl.LightningModule):
                                      pred['scale_refine_pos'][..., :self.output_dim]], dim=-1)
         pi = pred['pi']
         ####zy visualization
-        eval_mask = data['agent']['category'] == 3
+        eval_mask = data['agent']['category'] == 1
         traj_past = data['agent']['position'][eval_mask, :self.num_historical_steps, :2].cpu()
         origin_eval = data['agent']['position'][eval_mask, self.num_historical_steps - 1]
         theta_eval = data['agent']['heading'][eval_mask, self.num_historical_steps - 1]

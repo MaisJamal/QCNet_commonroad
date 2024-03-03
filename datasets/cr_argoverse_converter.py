@@ -101,11 +101,69 @@ def converter(scenario, planning_problem_set):
         
     print("len of segments ", len(argo_map.vector_lane_segments))    
 
-        
-        
-        #[seg_id:lane_seg]
+    ### convert agent data to argoverse dataframe (pandas)
+    data = {
+    "track_id": [],
+    "timestep": [],
+    "object_type":[],
+    "object_category":[],
+    "position_x":[],
+    "position_y":[],
+    "heading":[],
+    "velocity_x":[],
+    "velocity_y":[]
+    }
+
+    planning_problem = list(planning_problem_set.planning_problem_dict.values())[0]
+    INIT_STATE = planning_problem.initial_state
+
+    for dyn_obst in scenario.dynamic_obstacles:
+        for i in range(50):
+            if dyn_obst.state_at_time(i) == None:
+                print("Error: Commonroad scenario doesn't cover 5 seconds.")
+                break
+            obs_x = dyn_obst.state_at_time(i).position[0]
+            obs_y = dyn_obst.state_at_time(i).position[1] 
+            obs_id = dyn_obst.obstacle_id
+            obs_heading = dyn_obst.state_at_time(i).orientation
+            obs_v_x = dyn_obst.state_at_time(i).velocity
+            obs_v_y = 0.0
+            data["track_id"].append(obs_id)
+            data["timestep"].append(i)
+            data["object_type"].append("vehicle")
+            data["object_category"].append(1)
+            data["position_x"].append(obs_x)
+            data["position_y"].append(obs_y)
+            data["heading"].append(obs_heading)
+            data["velocity_x"].append(obs_v_x)
+            data["velocity_y"].append(obs_v_y)
+
+            ## append ego vehicle state
+            data["track_id"].append("AV")
+            data["timestep"].append(i)
+            data["object_type"].append("vehicle")
+            data["object_category"].append(1)
+            data["position_x"].append(INIT_STATE.position[0])
+            data["position_y"].append(INIT_STATE.position[1])
+            data["heading"].append(INIT_STATE.orientation)
+            data["velocity_x"].append(0)
+            data["velocity_y"].append(0)
+
+    #load data into a DataFrame object:
+    df = pd.DataFrame(data)
+    """
+    ['track_id']   = '8495' or 'AV'
+    ['timestep']  = 0 , 1 ,.., 49
+    ['object_type']  = vehicle
+    ['object_category'] = 1
+    ['position_x'] 
+    ['position_y']
+    ['heading']   pi
+    ['velocity_x'] -11 or + 10
+    ['velocity_y']
+    """
     
-    return argo_map, centerlines
+    return argo_map, centerlines,df
 
 
 def get_lane_mark(cr_mark):
