@@ -66,7 +66,7 @@ def converter(scenario, planning_problem_set):
     segments = []
     centerlines = {}
     print("len of lanelets ", len(scenario.lanelet_network.lanelets))
-    print("len of polygons ", len(scenario.lanelet_network.intersections))
+    #print("len of polygons ", len(scenario.lanelet_network.intersections))
     for lane in lanelets:
         seg_id = int(lane.lanelet_id)
         seg_lane_type = LaneType.VEHICLE
@@ -116,9 +116,9 @@ def converter(scenario, planning_problem_set):
 
     planning_problem = list(planning_problem_set.planning_problem_dict.values())[0]
     INIT_STATE = planning_problem.initial_state
-
+    num_historical_steps = 50
     for dyn_obst in scenario.dynamic_obstacles:
-        for i in range(50):
+        for i in range(num_historical_steps):
             if dyn_obst.state_at_time(i) == None:
                 print("Error: Commonroad scenario doesn't cover 5 seconds.")
                 break
