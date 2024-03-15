@@ -1,0 +1,17 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: run_predict",
+            "type": "python",
+            "request": "launch",
+            "module": "predict",
+            "justMyCode": true,
+            "args": ["--model","QCNet", "--root" , "/home/mais2/QCNet/test_test/" , "--ckpt_path", 
+            "/home/mais2/QCNet/lightning_logs/version_9/checkpoints/epoch=0-step=199908.ckpt"]
+        }
+    ]
+}
