@@ -117,37 +117,43 @@ def converter(scenario, planning_problem_set):
     planning_problem = list(planning_problem_set.planning_problem_dict.values())[0]
     INIT_STATE = planning_problem.initial_state
     num_historical_steps = 50
-    for dyn_obst in scenario.dynamic_obstacles:
-        for i in range(num_historical_steps):
-            if dyn_obst.state_at_time(i) == None:
-                print("Error: Commonroad scenario doesn't cover 5 seconds.")
-                break
-            obs_x = dyn_obst.state_at_time(i).position[0]
-            obs_y = dyn_obst.state_at_time(i).position[1] 
-            obs_id = dyn_obst.obstacle_id
-            obs_heading = dyn_obst.state_at_time(i).orientation
-            obs_v_x = dyn_obst.state_at_time(i).velocity
-            obs_v_y = 0.0
-            data["track_id"].append(obs_id)
-            data["timestep"].append(i)
-            data["object_type"].append("vehicle")
-            data["object_category"].append(1)
-            data["position_x"].append(obs_x)
-            data["position_y"].append(obs_y)
-            data["heading"].append(obs_heading)
-            data["velocity_x"].append(obs_v_x)
-            data["velocity_y"].append(obs_v_y)
 
-            ## append ego vehicle state
-            data["track_id"].append("AV")
-            data["timestep"].append(i)
-            data["object_type"].append("vehicle")
-            data["object_category"].append(1)
-            data["position_x"].append(INIT_STATE.position[0])
-            data["position_y"].append(INIT_STATE.position[1])
-            data["heading"].append(INIT_STATE.orientation)
-            data["velocity_x"].append(0)
-            data["velocity_y"].append(0)
+    ## append ego vehicle state
+    for i in range(num_historical_steps):
+        data["track_id"].append("AV")
+        data["timestep"].append(i)
+        data["object_type"].append("vehicle")
+        data["object_category"].append(1)
+        data["position_x"].append(INIT_STATE.position[0])
+        data["position_y"].append(INIT_STATE.position[1])
+        data["heading"].append(INIT_STATE.orientation)
+        data["velocity_x"].append(0)
+        data["velocity_y"].append(0)
+    k_obs = 0
+    bias = 40
+    for dyn_obst in scenario.dynamic_obstacles:
+        if  k_obs == 2 :
+            for i in range(num_historical_steps):
+                if dyn_obst.state_at_time(i+bias) == None:
+                    print("Error: Commonroad scenario doesn't cover 5 seconds.")
+                    break
+                obs_x = dyn_obst.state_at_time(i+bias).position[0]
+                obs_y = dyn_obst.state_at_time(i+bias).position[1] 
+                obs_id = dyn_obst.obstacle_id
+                obs_heading = dyn_obst.state_at_time(i+bias).orientation
+                obs_v_x = dyn_obst.state_at_time(i+bias).velocity
+                obs_v_y = 0.0
+                data["track_id"].append(obs_id)
+                data["timestep"].append(i)
+                data["object_type"].append("vehicle")
+                data["object_category"].append(3)
+                data["position_x"].append(obs_x)
+                data["position_y"].append(obs_y)
+                data["heading"].append(obs_heading)
+                data["velocity_x"].append(obs_v_x)
+                data["velocity_y"].append(obs_v_y)
+
+        k_obs += 1
 
     #load data into a DataFrame object:
     df = pd.DataFrame(data)

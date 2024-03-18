@@ -141,14 +141,21 @@ def plot_single_vehicle(
         head_width=0.1,
     )
     current_working_directory = str(Path.cwd())
-    # ## edit
+    # old #
     # static_map_path=f"{current_working_directory}/test_test/test/raw/{scenario_id}/log_map_archive_{scenario_id}.json"
     # static_map_path=Path(static_map_path)
     # static_map = ArgoverseStaticMap.from_json(static_map_path)
-    scene_path = "datasets/commonroad/USA_US101-1_1_T-1.xml"     
+    # end old #
+    
+    # new edit #
+    
+    #scene_path = "datasets/commonroad/USA_US101-1_1_T-1.xml"     #change_scenario
+    #scene_path = "datasets/commonroad/DEU_Nuremberg-39_5_T-1.xml" 
+    scene_path = "datasets/commonroad/DEU_Nuremberg-35_1_T-1.xml"
     scenario, planning_problem_set = CommonRoadFileReader(scene_path).open()
     static_map,centerlines,df_agents = conv.converter(scenario, planning_problem_set)
-    ##
+    
+    # end new edit#
     _plot_static_map_elements(static_map)
 
     plt.xlim(min_x - x_buffer, max_x + x_buffer)

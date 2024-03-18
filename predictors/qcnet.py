@@ -287,8 +287,7 @@ class QCNet(pl.LightningModule):
         self.log('val_minFDE', self.minFDE, prog_bar=True, on_step=False, on_epoch=True, batch_size=gt_eval.size(0))
         self.log('val_minFHE', self.minFHE, prog_bar=True, on_step=False, on_epoch=True, batch_size=gt_eval.size(0))
         self.log('val_MR', self.MR, prog_bar=True, on_step=False, on_epoch=True, batch_size=gt_eval.size(0))
-
-    def test_step(self,
+    def predict_step(self,
                   data,
                   batch_idx):
         if isinstance(data, Batch):
@@ -304,7 +303,7 @@ class QCNet(pl.LightningModule):
                                      pred['scale_refine_pos'][..., :self.output_dim]], dim=-1)
         pi = pred['pi']
         ####zy visualization
-        eval_mask = data['agent']['category'] == 1
+        eval_mask = data['agent']['category'] == 3
         traj_past = data['agent']['position'][eval_mask, :self.num_historical_steps, :2].cpu()
         origin_eval = data['agent']['position'][eval_mask, self.num_historical_steps - 1]
         theta_eval = data['agent']['heading'][eval_mask, self.num_historical_steps - 1]
@@ -325,12 +324,59 @@ class QCNet(pl.LightningModule):
         save_path = current_working_directory + '/test_test/test/plot/'
         run_generate_scenario_visualizations(full_path,save_path,1,'first',True,traj_eval[0,:,:,:])
         plot_single_vehicle(traj_past.numpy(),gt_eval.numpy(),traj_eval[0,:,:,:].numpy(),data.scenario_id[0])
+        #plot_single_vehicle(traj_past.numpy(),gt_eval.numpy(),traj_eval[1,:,:,:].numpy(),data.scenario_id[0])
         
         pi_eval = F.softmax(pi[eval_mask], dim=-1)
 
         traj_eval = traj_eval.cpu().numpy()
         pi_eval = pi_eval.cpu().numpy()
-        #print("********************************************")
+        print("probabilities of predictions: ",pi_eval[0])
+        pred = [traj_eval,pi_eval]
+        return pred
+    def test_step(self,
+                  data,
+                  batch_idx):
+        if isinstance(data, Batch):
+            data['agent']['av_index'] += data['agent']['ptr'][:-1]
+        pred = self(data)
+        if self.output_head:
+            traj_refine = torch.cat([pred['loc_refine_pos'][..., :self.output_dim],
+                                     pred['loc_refine_head'],
+                                     pred['scale_refine_pos'][..., :self.output_dim],
+                                     pred['conc_refine_head']], dim=-1)
+        else:
+            traj_refine = torch.cat([pred['loc_refine_pos'][..., :self.output_dim],
+                                     pred['scale_refine_pos'][..., :self.output_dim]], dim=-1)
+        pi = pred['pi']
+        ####zy visualization
+        eval_mask = data['agent']['category'] == 3
+        traj_past = data['agent']['position'][eval_mask, :self.num_historical_steps, :2].cpu()
+        origin_eval = data['agent']['position'][eval_mask, self.num_historical_steps - 1]
+        theta_eval = data['agent']['heading'][eval_mask, self.num_historical_steps - 1]
+        cos, sin = theta_eval.cos(), theta_eval.sin()
+        rot_mat = torch.zeros(eval_mask.sum(), 2, 2, device=self.device)
+        rot_mat[:, 0, 0] = cos
+        rot_mat[:, 0, 1] = sin
+        rot_mat[:, 1, 0] = -sin
+        rot_mat[:, 1, 1] = cos
+        traj_eval = torch.matmul(traj_refine[eval_mask, :, :, :2],
+                                 rot_mat.unsqueeze(1)) + origin_eval[:, :2].reshape(-1, 1, 1, 2)
+        
+        traj_eval=traj_eval.cpu()
+        gt_eval = data['agent']['position'][eval_mask, self.num_historical_steps:, :2].cpu()
+        current_working_directory = str(Path.cwd())
+        base_path = current_working_directory + '/test_test/test/{}'
+        full_path = base_path.format(data.scenario_id[0])
+        save_path = current_working_directory + '/test_test/test/plot/'
+        run_generate_scenario_visualizations(full_path,save_path,1,'first',True,traj_eval[0,:,:,:])
+        plot_single_vehicle(traj_past.numpy(),gt_eval.numpy(),traj_eval[0,:,:,:].numpy(),data.scenario_id[0])
+        #plot_single_vehicle(traj_past.numpy(),gt_eval.numpy(),traj_eval[1,:,:,:].numpy(),data.scenario_id[0])
+        
+        pi_eval = F.softmax(pi[eval_mask], dim=-1)
+
+        traj_eval = traj_eval.cpu().numpy()
+        pi_eval = pi_eval.cpu().numpy()
+        print("probabilities of predictions: ",pi_eval[0])
         if self.dataset == 'argoverse_v2':
             eval_id = list(compress(list(chain(*data['agent']['id'])), eval_mask))
             #print("pi trajs ", pi_eval[0], " agent id ", eval_id[0] , " trajectories " , traj_eval[0])

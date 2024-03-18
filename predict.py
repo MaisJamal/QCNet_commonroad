@@ -23,14 +23,17 @@ import datasets.cr_extractor as extractor
 import datasets.cr_argoverse_converter as conv
 from commonroad.common.file_reader import CommonRoadFileReader
 
+import os, shutil
 
 if __name__ == '__main__':
 
-    #scene_path = "datasets/commonroad/USA_US101-1_1_T-1.xml"     
+    #scene_path = "datasets/commonroad/USA_US101-1_1_T-1.xml"     #change_scenario
+    #scene_path = "datasets/commonroad/DEU_Nuremberg-39_5_T-1.xml"    
     #data = extractor.cr_scene_to_qcnet(scene_path)
     #scenario, planning_problem_set = CommonRoadFileReader(scene_path).open()
     #argo_map,centerlines = conv.converter(scenario, planning_problem_set)
-
+    if os.path.isdir("test_test/test"):
+        shutil.rmtree("test_test/test")
     pl.seed_everything(2023, workers=True)
 
     parser = ArgumentParser()
@@ -54,11 +57,10 @@ if __name__ == '__main__':
     dataloader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers,
                             pin_memory=args.pin_memory, persistent_workers=args.persistent_workers)
     trainer = pl.Trainer(accelerator=args.accelerator, devices=args.devices, strategy='ddp')
-    predictions = trainer.test(model, dataloader)
-    # predictions = trainer.predict(model, dataloader,return_predictions=True)
-    # print("pi" ,predictions[0]['pi'])
-    # print("loc_refine_pos" ,predictions[0]['loc_refine_pos'])
-    # print("loc_refine_head" ,predictions[0]['loc_refine_head'])
+   # predictions = trainer.test(model, dataloader)
+    pred = trainer.predict(model, dataloader,return_predictions=True)
+
+    print("pred" ,pred)
  
 
 

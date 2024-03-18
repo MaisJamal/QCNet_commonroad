@@ -191,27 +191,44 @@ class ArgoverseV2Dataset(Dataset):
             map_dir = Path(self.raw_dir) / raw_file_name
             map_path = map_dir / sorted(map_dir.glob('log_map_archive_*.json'))[0]
             map_data = read_json_file(map_path)
+            #map_data['drivable_areas'] = []
+            #map_data['pedestrian_crossings'] = []
+            ## new edit
+            
             map_data['drivable_areas'] = []
             map_data['pedestrian_crossings'] = []
-            ## new ##
 
-            scene_path = "datasets/commonroad/USA_US101-1_1_T-1.xml"     
-            #data = extractor.cr_scene_to_qcnet(scene_path)
+            #scene_path = "datasets/commonroad/USA_US101-1_1_T-1.xml"     #change_scenario
+            #scene_path = "datasets/commonroad/DEU_Nuremberg-39_5_T-1.xml"  
+            scene_path = "datasets/commonroad/DEU_Nuremberg-35_1_T-1.xml"
             scenario, planning_problem_set = CommonRoadFileReader(scene_path).open()
             argo_map,centerlines,df_agents = conv.converter(scenario, planning_problem_set)
 
             map_api = argo_map
-            ## edit ##
-            #centerlines = {lane_segment['id']: Polyline.from_json_data(lane_segment['centerline'])
-            #               for lane_segment in map_data['lane_segments'].values()}
-            #map_api = ArgoverseStaticMap.from_json(map_path)
+
             data = dict()
             data['scenario_id'] = self.get_scenario_id(df)
             data['city'] = self.get_city(df)
             data['agent'] = self.get_agent_features(df_agents)
+            
+            
+            ## end new edit ##
+
+            ## old ##
+            """
+            centerlines = {lane_segment['id']: Polyline.from_json_data(lane_segment['centerline'])
+                           for lane_segment in map_data['lane_segments'].values()}
+            map_api = ArgoverseStaticMap.from_json(map_path)
+            data = dict()
+            data['scenario_id'] = self.get_scenario_id(df)
+            data['city'] = self.get_city(df)
+            data['agent'] = self.get_agent_features(df)
+            """
+            # end old #
+
             data.update(self.get_map_features(map_api, centerlines))
 
-            ## end edit ##
+            ## end old ##
             with open(os.path.join(self.processed_dir, f'{raw_file_name}.pkl'), 'wb') as handle:
                 pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
