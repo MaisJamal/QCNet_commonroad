@@ -195,12 +195,13 @@ class ArgoverseV2Dataset(Dataset):
             #map_data['pedestrian_crossings'] = []
             ## new edit
             
-            map_data['drivable_areas'] = []
-            map_data['pedestrian_crossings'] = []
+            #map_data['drivable_areas'] = []
+            #map_data['pedestrian_crossings'] = []
 
             #scene_path = "datasets/commonroad/USA_US101-1_1_T-1.xml"     #change_scenario
             #scene_path = "datasets/commonroad/DEU_Nuremberg-39_5_T-1.xml"  
-            scene_path = "datasets/commonroad/DEU_Nuremberg-35_1_T-1.xml"
+            #scene_path = "datasets/commonroad/DEU_Nuremberg-35_1_T-1.xml"
+            scene_path = "datasets/commonroad/CHN_Tianjin-12_28_T-1.xml"
             scenario, planning_problem_set = CommonRoadFileReader(scene_path).open()
             argo_map,centerlines,df_agents = conv.converter(scenario, planning_problem_set)
 

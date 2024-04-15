@@ -151,7 +151,8 @@ def plot_single_vehicle(
     
     #scene_path = "datasets/commonroad/USA_US101-1_1_T-1.xml"     #change_scenario
     #scene_path = "datasets/commonroad/DEU_Nuremberg-39_5_T-1.xml" 
-    scene_path = "datasets/commonroad/DEU_Nuremberg-35_1_T-1.xml"
+    #scene_path = "datasets/commonroad/DEU_Nuremberg-35_1_T-1.xml"
+    scene_path = "datasets/commonroad/CHN_Tianjin-12_28_T-1.xml"
     scenario, planning_problem_set = CommonRoadFileReader(scene_path).open()
     static_map,centerlines,df_agents = conv.converter(scenario, planning_problem_set)
     
