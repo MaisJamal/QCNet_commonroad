@@ -22,7 +22,10 @@ from av2.map.map_api import ArgoverseStaticMap
 import datasets.cr_extractor as extractor
 import datasets.cr_argoverse_converter as conv
 from commonroad.common.file_reader import CommonRoadFileReader
+import yaml
 
+with open('ffstreams/config/config.yml', 'r') as file:
+    config = yaml.safe_load(file)
 _DEFAULT_N_JOBS: Final[int] = -2  # Use all but one CPUs
 
 
@@ -79,7 +82,8 @@ def generate_scenario_visualizations(
         #scene_path = "datasets/commonroad/USA_US101-1_1_T-1.xml"     #change_scenario
         #scene_path = "datasets/commonroad/DEU_Nuremberg-39_5_T-1.xml"    
         #scene_path = "datasets/commonroad/DEU_Nuremberg-35_1_T-1.xml"
-        scene_path = "datasets/commonroad/CHN_Tianjin-12_28_T-1.xml"
+        #scene_path = "datasets/commonroad/CHN_Tianjin-12_28_T-1.xml"
+        scene_path = config['cr_scene']['path']
         scenario, planning_problem_set = CommonRoadFileReader(scene_path).open()
         argo_map,centerlines = conv.converter(scenario, planning_problem_set)
 

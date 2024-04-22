@@ -5,6 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: KeepLane",
+            "type": "python",
+            "request": "launch",
+            "module": "ffstreams.auto_driving.keep_lane.run"
+        },
+        {
             "name": "Python: run_predict",
             "type": "python",
             "request": "launch",
@@ -12,6 +18,19 @@
             "justMyCode": true,
             "args": ["--model","QCNet", "--root" , "/home/mais2/QCNet/test_test/" , "--ckpt_path", 
             "/home/mais2/QCNet/lightning_logs/version_9/checkpoints/epoch=0-step=199908.ckpt"]
+        },
+        {
+            "name": "Python: LaneChange",
+            "type": "python",
+            "request": "launch",
+            "module": "ffstreams.auto_driving.lane_change.run"
+        },
+        {
+            "name": "Python: CommonRoad",
+            "type": "python",
+            "request": "launch",
+            "module": "ffstreams.auto_driving.commonroad.run_commonR_scen"
         }
+
     ]
 }

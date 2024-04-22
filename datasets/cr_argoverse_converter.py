@@ -130,28 +130,28 @@ def converter(scenario, planning_problem_set):
         data["velocity_x"].append(0)
         data["velocity_y"].append(0)
     k_obs = 0
-    bias = 40
+    bias = 0#40
     for dyn_obst in scenario.dynamic_obstacles:
-        if  k_obs == 2 :
-            for i in range(num_historical_steps):
-                if dyn_obst.state_at_time(i+bias) == None:
-                    print("Error: Commonroad scenario doesn't cover 5 seconds.")
-                    break
-                obs_x = dyn_obst.state_at_time(i+bias).position[0]
-                obs_y = dyn_obst.state_at_time(i+bias).position[1] 
-                obs_id = dyn_obst.obstacle_id
-                obs_heading = dyn_obst.state_at_time(i+bias).orientation
-                obs_v_x = dyn_obst.state_at_time(i+bias).velocity
-                obs_v_y = 0.0
-                data["track_id"].append(obs_id)
-                data["timestep"].append(i)
-                data["object_type"].append("vehicle")
-                data["object_category"].append(3)
-                data["position_x"].append(obs_x)
-                data["position_y"].append(obs_y)
-                data["heading"].append(obs_heading)
-                data["velocity_x"].append(obs_v_x)
-                data["velocity_y"].append(obs_v_y)
+        #if  k_obs == 0 :#2
+        for i in range(num_historical_steps):
+            if dyn_obst.state_at_time(i+bias) == None:
+                print("Error: Commonroad scenario doesn't cover 5 seconds.")
+                break
+            obs_x = dyn_obst.state_at_time(i+bias).position[0]
+            obs_y = dyn_obst.state_at_time(i+bias).position[1] 
+            obs_id = dyn_obst.obstacle_id
+            obs_heading = dyn_obst.state_at_time(i+bias).orientation
+            obs_v_x = dyn_obst.state_at_time(i+bias).velocity
+            obs_v_y = 0.0
+            data["track_id"].append(obs_id)
+            data["timestep"].append(i)
+            data["object_type"].append("vehicle")
+            data["object_category"].append(3)
+            data["position_x"].append(obs_x)
+            data["position_y"].append(obs_y)
+            data["heading"].append(obs_heading)
+            data["velocity_x"].append(obs_v_x)
+            data["velocity_y"].append(obs_v_y)
 
         k_obs += 1
 

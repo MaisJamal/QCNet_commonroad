@@ -40,7 +40,10 @@ try:
     from av2.datasets.motion_forecasting.eval.submission import ChallengeSubmission
 except ImportError:
     ChallengeSubmission = object
+import yaml
 
+with open('ffstreams/config/config.yml', 'r') as file:
+    config = yaml.safe_load(file)
 
 class QCNet(pl.LightningModule):
 
@@ -318,21 +321,21 @@ class QCNet(pl.LightningModule):
         
         traj_eval=traj_eval.cpu()
         gt_eval = data['agent']['position'][eval_mask, self.num_historical_steps:, :2].cpu()
-        current_working_directory = str(Path.cwd())
-        base_path = current_working_directory + '/test_test/test/{}'
-        full_path = base_path.format(data.scenario_id[0])
-        save_path = current_working_directory + '/test_test/test/plot/'
-        run_generate_scenario_visualizations(full_path,save_path,1,'first',True,traj_eval[0,:,:,:])
-        plot_single_vehicle(traj_past.numpy(),gt_eval.numpy(),traj_eval[0,:,:,:].numpy(),data.scenario_id[0])
-        #plot_single_vehicle(traj_past.numpy(),gt_eval.numpy(),traj_eval[1,:,:,:].numpy(),data.scenario_id[0])
+        if config['prediction_visualization']['visualize'] == True:
+            current_working_directory = str(Path.cwd())
+            base_path = current_working_directory + '/test_test/test/{}'
+            full_path = base_path.format(data.scenario_id[0])
+            save_path = current_working_directory + '/test_test/test/plot/'
+            run_generate_scenario_visualizations(full_path,save_path,1,'first',True,traj_eval[0,:,:,:])
+            plot_single_vehicle(traj_past.numpy(),gt_eval.numpy(),traj_eval[0,:,:,:].numpy(),data.scenario_id[0])
+            #plot_single_vehicle(traj_past.numpy(),gt_eval.numpy(),traj_eval[1,:,:,:].numpy(),data.scenario_id[0])
         
         pi_eval = F.softmax(pi[eval_mask], dim=-1)
 
         traj_eval = traj_eval.cpu().numpy()
         pi_eval = pi_eval.cpu().numpy()
         print("probabilities of predictions: ",pi_eval[0])
-        pred = [traj_eval,pi_eval]
-        return pred
+        return traj_eval,pi_eval
     def test_step(self,
                   data,
                   batch_idx):
@@ -364,12 +367,15 @@ class QCNet(pl.LightningModule):
         
         traj_eval=traj_eval.cpu()
         gt_eval = data['agent']['position'][eval_mask, self.num_historical_steps:, :2].cpu()
-        current_working_directory = str(Path.cwd())
-        base_path = current_working_directory + '/test_test/test/{}'
-        full_path = base_path.format(data.scenario_id[0])
-        save_path = current_working_directory + '/test_test/test/plot/'
-        run_generate_scenario_visualizations(full_path,save_path,1,'first',True,traj_eval[0,:,:,:])
-        plot_single_vehicle(traj_past.numpy(),gt_eval.numpy(),traj_eval[0,:,:,:].numpy(),data.scenario_id[0])
+
+        if config['prediction_visualization']['visualize'] == True:
+            current_working_directory = str(Path.cwd())
+            base_path = current_working_directory + '/test_test/test/{}'
+            full_path = base_path.format(data.scenario_id[0])
+            save_path = current_working_directory + '/test_test/test/plot/'
+            run_generate_scenario_visualizations(full_path,save_path,1,'first',True,traj_eval[0,:,:,:])
+        
+            plot_single_vehicle(traj_past.numpy(),gt_eval.numpy(),traj_eval[0,:,:,:].numpy(),data.scenario_id[0])
         #plot_single_vehicle(traj_past.numpy(),gt_eval.numpy(),traj_eval[1,:,:,:].numpy(),data.scenario_id[0])
         
         pi_eval = F.softmax(pi[eval_mask], dim=-1)

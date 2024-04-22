@@ -14,7 +14,12 @@ from pathlib import Path
 import datasets.cr_extractor as extractor
 import datasets.cr_argoverse_converter as conv
 from commonroad.common.file_reader import CommonRoadFileReader
+import yaml
 
+with open('ffstreams/config/config.yml', 'r') as file:
+    config = yaml.safe_load(file)
+
+    
 _LANE_SEGMENT_COLOR: Final[str] = "#E0E0E0"
 _DRIVABLE_AREA_COLOR: Final[str] = "#7A7A7A"
 '''
@@ -152,7 +157,8 @@ def plot_single_vehicle(
     #scene_path = "datasets/commonroad/USA_US101-1_1_T-1.xml"     #change_scenario
     #scene_path = "datasets/commonroad/DEU_Nuremberg-39_5_T-1.xml" 
     #scene_path = "datasets/commonroad/DEU_Nuremberg-35_1_T-1.xml"
-    scene_path = "datasets/commonroad/CHN_Tianjin-12_28_T-1.xml"
+    #scene_path = "datasets/commonroad/CHN_Tianjin-12_28_T-1.xml"
+    scene_path = config['cr_scene']['path']
     scenario, planning_problem_set = CommonRoadFileReader(scene_path).open()
     static_map,centerlines,df_agents = conv.converter(scenario, planning_problem_set)
     
