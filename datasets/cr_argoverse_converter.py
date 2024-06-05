@@ -53,9 +53,12 @@ except ImportError:
     ArgoverseStaticMap = object
     Polyline = object
     read_json_file = object
+import yaml
 
+with open('ffstreams/config/config.yml', 'r') as file:
+    config = yaml.safe_load(file)
 
-def converter(scenario, planning_problem_set):
+def converter(scenario, planning_problem_set,time_step=0):
     argo_map =ArgoverseStaticMap(log_id="1",vector_drivable_areas={},vector_lane_segments={},
                                 vector_pedestrian_crossings = {},raster_drivable_area_layer={}, raster_roi_layer={},raster_ground_height_layer={}) 
     argo_map.log_id = "0"
@@ -116,7 +119,7 @@ def converter(scenario, planning_problem_set):
 
     planning_problem = list(planning_problem_set.planning_problem_dict.values())[0]
     INIT_STATE = planning_problem.initial_state
-    num_historical_steps = 50
+    num_historical_steps = 110
 
     ## append ego vehicle state
     for i in range(num_historical_steps):
@@ -130,28 +133,36 @@ def converter(scenario, planning_problem_set):
         data["velocity_x"].append(0)
         data["velocity_y"].append(0)
     k_obs = 0
-    bias = 0#40
+    bias = time_step-50#40
+    ## check if all obstacles cover the prediction horizon
+    obs_covered = np.full((len(scenario.dynamic_obstacles)), True)
+    if config['metrics']['save']:
+        for obs_idx in range(len(scenario.dynamic_obstacles)):
+            if scenario.dynamic_obstacles[obs_idx].state_at_time(num_historical_steps+bias) == None:
+                obs_covered[obs_idx] = False
+    ##
     for dyn_obst in scenario.dynamic_obstacles:
         #if  k_obs == 0 :#2
-        for i in range(num_historical_steps):
-            if dyn_obst.state_at_time(i+bias) == None:
-                print("Error: Commonroad scenario doesn't cover 5 seconds.")
-                break
-            obs_x = dyn_obst.state_at_time(i+bias).position[0]
-            obs_y = dyn_obst.state_at_time(i+bias).position[1] 
-            obs_id = dyn_obst.obstacle_id
-            obs_heading = dyn_obst.state_at_time(i+bias).orientation
-            obs_v_x = dyn_obst.state_at_time(i+bias).velocity
-            obs_v_y = 0.0
-            data["track_id"].append(obs_id)
-            data["timestep"].append(i)
-            data["object_type"].append("vehicle")
-            data["object_category"].append(3)
-            data["position_x"].append(obs_x)
-            data["position_y"].append(obs_y)
-            data["heading"].append(obs_heading)
-            data["velocity_x"].append(obs_v_x)
-            data["velocity_y"].append(obs_v_y)
+        if obs_covered[k_obs]:
+            for i in range(num_historical_steps):
+                if dyn_obst.state_at_time(i+bias) == None:
+                    print("Error: Commonroad scenario doesn't cover 5 seconds.")
+                    break
+                obs_x = dyn_obst.state_at_time(i+bias).position[0]
+                obs_y = dyn_obst.state_at_time(i+bias).position[1] 
+                obs_id = dyn_obst.obstacle_id
+                obs_heading = dyn_obst.state_at_time(i+bias).orientation
+                obs_v_x = dyn_obst.state_at_time(i+bias).velocity
+                obs_v_y = 0.0
+                data["track_id"].append(obs_id)
+                data["timestep"].append(i)
+                data["object_type"].append("vehicle")
+                data["object_category"].append(3)
+                data["position_x"].append(obs_x)
+                data["position_y"].append(obs_y)
+                data["heading"].append(obs_heading)
+                data["velocity_x"].append(obs_v_x)
+                data["velocity_y"].append(obs_v_y)
 
         k_obs += 1
 

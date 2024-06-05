@@ -160,7 +160,10 @@ def plot_single_vehicle(
     #scene_path = "datasets/commonroad/CHN_Tianjin-12_28_T-1.xml"
     scene_path = config['cr_scene']['path']
     scenario, planning_problem_set = CommonRoadFileReader(scene_path).open()
-    static_map,centerlines,df_agents = conv.converter(scenario, planning_problem_set)
+    f = open("time_step.txt")
+    time_step = int(f.read())
+    f.close()
+    static_map,centerlines,df_agents = conv.converter(scenario, planning_problem_set,time_step)
     
     # end new edit#
     _plot_static_map_elements(static_map)

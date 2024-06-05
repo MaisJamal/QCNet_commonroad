@@ -85,7 +85,10 @@ def generate_scenario_visualizations(
         #scene_path = "datasets/commonroad/CHN_Tianjin-12_28_T-1.xml"
         scene_path = config['cr_scene']['path']
         scenario, planning_problem_set = CommonRoadFileReader(scene_path).open()
-        argo_map,centerlines = conv.converter(scenario, planning_problem_set)
+        f = open("time_step.txt")
+        time_step = int(f.read())
+        f.close()
+        argo_map,centerlines = conv.converter(scenario, planning_problem_set,time_step)
 
         static_map = argo_map
         

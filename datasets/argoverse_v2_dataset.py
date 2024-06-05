@@ -208,7 +208,17 @@ class ArgoverseV2Dataset(Dataset):
             #scene_path = "datasets/commonroad/CHN_Tianjin-12_28_T-1.xml"
             scene_path = config['cr_scene']['path']
             scenario, planning_problem_set = CommonRoadFileReader(scene_path).open()
-            argo_map,centerlines,df_agents = conv.converter(scenario, planning_problem_set)
+            f = open("time_step.txt")
+            time_step = int(f.read())
+            f.close()
+            if scene_path == "datasets/commonroad/DEU_Nuremberg-39_5_T-1.xml" :
+                #leave only two obstacles
+                scenario.remove_obstacle(scenario.dynamic_obstacles[0])
+                scenario.remove_obstacle(scenario.dynamic_obstacles[1])
+                scenario.remove_obstacle(scenario.dynamic_obstacles[1])
+                scenario.remove_obstacle(scenario.dynamic_obstacles[0])
+    ####
+            argo_map,centerlines,df_agents = conv.converter(scenario, planning_problem_set,time_step)
 
             map_api = argo_map
 

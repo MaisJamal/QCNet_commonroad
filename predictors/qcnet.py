@@ -331,7 +331,53 @@ class QCNet(pl.LightningModule):
             #plot_single_vehicle(traj_past.numpy(),gt_eval.numpy(),traj_eval[1,:,:,:].numpy(),data.scenario_id[0])
         
         pi_eval = F.softmax(pi[eval_mask], dim=-1)
-
+        
+               
+        #gt_eval = gt[eval_mask]
+        ### save metrics
+        if config['metrics']['save']:
+            reg_mask = data['agent']['predict_mask'][:, self.num_historical_steps:]
+            device = 0
+            traj_eval_tensor = traj_eval.to(device)
+            valid_mask_eval = reg_mask[eval_mask]
+            valid_mask_eval = valid_mask_eval.to(device)
+            gt_eval= gt_eval.to(device)
+            pi_eval = pi_eval.to(device)
+            pred_horizon = 10# default = 60
+            self.Brier.update(pred=traj_eval_tensor[...,:pred_horizon, :self.output_dim], target=gt_eval[...,:pred_horizon, :self.output_dim], prob=pi_eval,
+                            valid_mask=valid_mask_eval[...,:pred_horizon])
+            self.minADE.update(pred=traj_eval_tensor[...,:pred_horizon, :self.output_dim], target=gt_eval[...,:pred_horizon, :self.output_dim], prob=pi_eval,
+                            valid_mask=valid_mask_eval[...,:pred_horizon])
+            self.minAHE.update(pred=traj_eval_tensor[...,:pred_horizon, :self.output_dim], target=gt_eval[...,:pred_horizon, :self.output_dim], prob=pi_eval, 
+                            valid_mask=valid_mask_eval[...,:pred_horizon])
+            self.minFDE.update(pred=traj_eval_tensor[...,:pred_horizon, :self.output_dim], target=gt_eval[...,:pred_horizon, :self.output_dim], prob=pi_eval,
+                            valid_mask=valid_mask_eval[...,:pred_horizon])
+            self.minFHE.update(pred=traj_eval_tensor[...,:pred_horizon, :self.output_dim], target=gt_eval[...,:pred_horizon, :self.output_dim], prob=pi_eval, 
+                            valid_mask=valid_mask_eval[...,:pred_horizon])
+            self.MR.update(pred=traj_eval_tensor[...,:pred_horizon, :self.output_dim], target=gt_eval[...,:pred_horizon, :self.output_dim], prob=pi_eval,
+                            valid_mask=valid_mask_eval[...,:pred_horizon])
+            brier = self.Brier.compute().cpu()
+            minADE1 = self.minADE.compute().cpu()
+            minAHE1 = self.minAHE.compute().cpu()
+            minFDE1 = self.minFDE.compute().cpu()
+            minFHE1 = self.minFHE.compute().cpu()
+            MR11 = self.MR.compute().cpu()
+            f = open("metrics.txt", "w")
+            string = "val_Brier  "+ str(brier.numpy()) + " \nground truth " +str(gt_eval.cpu().numpy())
+            f.write(string)
+            string = "\nval_minADE " + str(minADE1.numpy()) 
+            f.write(string)
+            string = "\nval_minAHE " + str(minAHE1.numpy()) 
+            f.write(string)
+            string = "\nval_minFDE " + str(minFDE1.numpy()) 
+            f.write(string)
+            string = "\nval_minFHE " + str(minFHE1.numpy()) 
+            f.write(string)
+            string = "\nval_MR " + str(MR11.numpy()) 
+            f.write(string)
+            
+            f.close()
+        #####
         traj_eval = traj_eval.cpu().numpy()
         pi_eval = pi_eval.cpu().numpy()
         print("probabilities of predictions: ",pi_eval[0])

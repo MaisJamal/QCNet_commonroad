@@ -30,9 +30,15 @@ import yaml
 with open('ffstreams/config/config.yml', 'r') as file:
     config = yaml.safe_load(file)
 
-def predict_traj():
+def predict_traj(time_step):
     if os.path.isdir("test_test/test"):
         shutil.rmtree("test_test/test")
+
+    # save time step
+    f = open("time_step.txt", "w")
+    f.write(str(time_step))
+    f.close()
+    
     pl.seed_everything(2023, workers=True)
 
     # parser = ArgumentParser()
@@ -70,9 +76,9 @@ def predict_traj():
     pred = trainer.predict(model, dataloader,return_predictions=True)
     pred_traj = pred[0][0]
     pred_prob = pred[0][1]
-    print("pred" ,pred)
-    print("pred traj shape" ,pred_traj.shape)
-    print("pred probabilities shape" ,pred_prob.shape)
+    # print("pred" ,pred)
+    # print("pred traj shape" ,pred_traj.shape)
+    # print("pred probabilities shape" ,pred_prob.shape)
     return pred_traj,pred_prob
 
 
@@ -82,7 +88,10 @@ if __name__ == '__main__':
     #scene_path = "datasets/commonroad/DEU_Nuremberg-39_5_T-1.xml"    
     #data = extractor.cr_scene_to_qcnet(scene_path)
     #scenario, planning_problem_set = CommonRoadFileReader(scene_path).open()
-    #argo_map,centerlines = conv.converter(scenario, planning_problem_set)
+    # f = open("time_step.txt")
+    # time_step = int(f.read())
+    # f.close()
+    #argo_map,centerlines = conv.converter(scenario, planning_problem_set,time_step)
     if config['prediction_visualization']['visualize'] == False:
         print ("visualization off")
     if os.path.isdir("test_test/test"):
